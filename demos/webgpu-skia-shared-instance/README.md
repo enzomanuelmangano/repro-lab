@@ -31,3 +31,9 @@ react-native-webgpu then creates its own instance, and callbacks of the imported
 | Before | After (`fix/webgpu-skia-shared-instance`) |
 | --- | --- |
 | ![before](../../media/webgpu-skia-shared-instance-before.png) | ![after](../../media/webgpu-skia-shared-instance-after.png) |
+
+## Upstream
+
+- Issue: https://github.com/wcandillon/react-native-skia/issues/4305
+- PR: https://github.com/wcandillon/react-native-skia/pull/4306
+- Fix branch here: `fix/webgpu-skia-shared-instance`

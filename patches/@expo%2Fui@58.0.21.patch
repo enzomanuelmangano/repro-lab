@@ -1,0 +1,96 @@
+diff --git a/build/universal/TextInput/index.android.js b/build/universal/TextInput/index.android.js
+index ab3a6a3ecc7630c460e5bab0efed7c37503fc067..f61e30dae83fd66f62af7c031eeee3cd57608f45 100644
+--- a/build/universal/TextInput/index.android.js
++++ b/build/universal/TextInput/index.android.js
+@@ -9,6 +9,16 @@ function mapReturnKeyType(value) {
+     if (value === 'join' || value === 'route' || value === 'emergency-call') return 'default';
+     return value;
+ }
++function mapSecureKeyboardType(value) {
++    switch (value) {
++        case 'numeric':
++        case 'number-pad':
++        case 'decimal-pad':
++            return 'numberPassword';
++        default:
++            return 'password';
++    }
++}
+ function mapKeyboardType(value) {
+     switch(value){
+         case 'default':
+@@ -67,15 +77,21 @@ export function TextInput({ ref, value, onChangeText, placeholder, autoFocus, ed
+         if (focused) onFocus?.();
+         else onBlur?.();
+     };
+-    const keyboardOptions = keyboardType || autoCapitalize || autoCorrect !== undefined || returnKeyType ? {
+-        ...keyboardType ? {
+-            keyboardType: mapKeyboardType(keyboardType)
++    const resolvedKeyboardType = secureTextEntry
++        ? mapSecureKeyboardType(keyboardType)
++        : keyboardType
++            ? mapKeyboardType(keyboardType)
++            : undefined;
++    const resolvedAutoCorrect = secureTextEntry ? false : autoCorrect;
++    const keyboardOptions = resolvedKeyboardType || autoCapitalize || resolvedAutoCorrect !== undefined || returnKeyType ? {
++        ...resolvedKeyboardType ? {
++            keyboardType: resolvedKeyboardType
+         } : null,
+         ...autoCapitalize ? {
+             capitalization: autoCapitalize
+         } : null,
+-        ...autoCorrect !== undefined ? {
+-            autoCorrectEnabled: autoCorrect
++        ...resolvedAutoCorrect !== undefined ? {
++            autoCorrectEnabled: resolvedAutoCorrect
+         } : null,
+         ...returnKeyType ? {
+             imeAction: mapReturnKeyType(returnKeyType)
+diff --git a/src/universal/TextInput/index.android.tsx b/src/universal/TextInput/index.android.tsx
+index 4dbf48ece22a32477a70aa2d110fbb1ca728eb07..ed4a7e7cc3a89d532c5ce102299d54ee809758e5 100644
+--- a/src/universal/TextInput/index.android.tsx
++++ b/src/universal/TextInput/index.android.tsx
+@@ -26,6 +26,17 @@ function mapReturnKeyType(value: ReturnKeyTypeOptions): TextFieldImeAction {
+   return value as TextFieldImeAction;
+ }
+ 
++function mapSecureKeyboardType(value: KeyboardTypeOptions | undefined): TextFieldKeyboardType {
++  switch (value) {
++    case 'numeric':
++    case 'number-pad':
++    case 'decimal-pad':
++      return 'numberPassword';
++    default:
++      return 'password';
++  }
++}
++
+ function mapKeyboardType(value: KeyboardTypeOptions): TextFieldKeyboardType {
+   switch (value) {
+     case 'default':
+@@ -133,12 +144,22 @@ export function TextInput({
+     else onBlur?.();
+   };
+ 
++  // `visualTransformation` only masks the text on screen. The keyboard reads the
++  // keyboard type, so a secure field must be a password type too, or the keyboard
++  // suggests and learns what is typed.
++  const resolvedKeyboardType = secureTextEntry
++    ? mapSecureKeyboardType(keyboardType)
++    : keyboardType
++      ? mapKeyboardType(keyboardType)
++      : undefined;
++  const resolvedAutoCorrect = secureTextEntry ? false : autoCorrect;
++
+   const keyboardOptions =
+-    keyboardType || autoCapitalize || autoCorrect !== undefined || returnKeyType
++    resolvedKeyboardType || autoCapitalize || resolvedAutoCorrect !== undefined || returnKeyType
+       ? {
+-          ...(keyboardType ? { keyboardType: mapKeyboardType(keyboardType) } : null),
++          ...(resolvedKeyboardType ? { keyboardType: resolvedKeyboardType } : null),
+           ...(autoCapitalize ? { capitalization: autoCapitalize } : null),
+-          ...(autoCorrect !== undefined ? { autoCorrectEnabled: autoCorrect } : null),
++          ...(resolvedAutoCorrect !== undefined ? { autoCorrectEnabled: resolvedAutoCorrect } : null),
+           ...(returnKeyType ? { imeAction: mapReturnKeyType(returnKeyType) } : null),
+         }
+       : undefined;

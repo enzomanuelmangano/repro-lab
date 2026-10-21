@@ -36,6 +36,7 @@ npx expo run:ios
 | [webgpu-skia-shared-instance](demos/webgpu-skia-shared-instance) | react-native-skia 3.7.2 + react-native-webgpu 0.17.0 | iOS, Android | [skia#4305](https://github.com/wcandillon/react-native-skia/issues/4305) (iOS), [webgpu#581](https://github.com/wcandillon/react-native-webgpu/issues/581) (Android) | [skia#4306](https://github.com/wcandillon/react-native-skia/pull/4306) (iOS), [webgpu#582](https://github.com/wcandillon/react-native-webgpu/pull/582) (Android) |
 | [screens-interactive-pop-release](demos/screens-interactive-pop-release) | react-native-screens 4.30.0 | iOS | [#5009](https://github.com/software-mansion/react-native-screens/issues/5009) | [#5010](https://github.com/software-mansion/react-native-screens/pull/5010) |
 | [bottom-tabs-surface-rebuild](demos/bottom-tabs-surface-rebuild) | @react-navigation/bottom-tabs 7.21.0 | Android | – | – |
+| [screens-android-back-reattach](demos/screens-android-back-reattach) | react-native-screens 4.30.0 | Android | – | – |
 
 ## Versions
 

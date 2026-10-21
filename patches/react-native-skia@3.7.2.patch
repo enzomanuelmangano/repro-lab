@@ -1,0 +1,18 @@
+diff --git a/react-native-skia.podspec b/react-native-skia.podspec
+index 8e33fe16a34f96241eaa75f9ead9126bc48d39b3..cdc0218c872a129b0e5ac69bd93053c15b1cded4 100644
+--- a/react-native-skia.podspec
++++ b/react-native-skia.podspec
+@@ -184,6 +184,13 @@ Pod::Spec.new do |s|
+     "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp"/** "$(PODS_TARGET_SRCROOT)/cpp" "$(PODS_TARGET_SRCROOT)/cpp/skia" "$(PODS_TARGET_SRCROOT)/cpp/dawn/include"'
+   }
+ 
++  # Keep rnskia_getWGPUInstance in the app binary. Nothing references it, so the
++  # linker skips its object file in the static library, and react-native-webgpu's
++  # dlsym lookup finds nothing. `-u` makes the linker load it and keep it.
++  s.user_target_xcconfig = {
++    'OTHER_LDFLAGS' => '$(inherited) -Wl,-u,_rnskia_getWGPUInstance'
++  }
++
+   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
+ 
+   # Platform-specific vendored frameworks (copied into libs/)

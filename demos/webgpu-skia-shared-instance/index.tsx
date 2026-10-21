@@ -48,6 +48,6 @@ function SharedInstance() {
 export const component = SharedInstance;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, gap: 16 },
+  container: { flex: 1, padding: 24, gap: 16, justifyContent: 'flex-end', paddingBottom: 96 },
   status: { fontSize: 16 },
 });

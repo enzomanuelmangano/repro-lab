@@ -1,3 +1,6 @@
+diff --git a/node_modules/react-native-screens/.bun-tag-97b4a2a2846414a7 b/.bun-tag-97b4a2a2846414a7
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/ios/RNSPercentDrivenInteractiveTransition.h b/ios/RNSPercentDrivenInteractiveTransition.h
 index f993cc73b0f0c71632f62c75bca1a05cdf07188a..29607ba35487ce27e4ae2cab712f42d7259ab80a 100644
 --- a/ios/RNSPercentDrivenInteractiveTransition.h
@@ -56,3 +59,38 @@ index 5da11964f5932cb44e1131c44a2480803c0a62b5..0eb52987d1060c2d5daceb3f4b6a758a
        if (shouldFinishTransition) {
          [_interactionController finishInteractiveTransition];
        } else {
+diff --git a/ios/RNSScreenStackAnimator.h b/ios/RNSScreenStackAnimator.h
+index 0870f8d1ead7c66b3f29828591fd6a24d7914194..0b34a685896c53dc901d06443267b516dd2a3992 100644
+--- a/ios/RNSScreenStackAnimator.h
++++ b/ios/RNSScreenStackAnimator.h
+@@ -9,14 +9,6 @@
+ 
+ - (nonnull instancetype)initWithOperation:(UINavigationControllerOperation)operation;
+ 
+-/// In case of interactive / interruptible transition (e.g. swipe back gesture) this method should return
+-/// timing parameters expected by animator to be used for animation completion (e.g. when user's
+-/// gesture had ended).
+-///
+-/// @return timing curve provider expected to be used for animation completion or nil,
+-/// when there is no interactive transition running.
+-- (nullable id<UITimingCurveProvider>)timingParamsForAnimationCompletion;
+-
+ + (BOOL)isCustomAnimation:(RNSScreenStackAnimation)animation;
+ 
+ @end
+diff --git a/ios/RNSScreenStackAnimator.mm b/ios/RNSScreenStackAnimator.mm
+index 90792c3dd5c231d65462e0051b1ee0dd93b4acc5..627c7b97406bb9575263369f490eda0d48fa8a96 100644
+--- a/ios/RNSScreenStackAnimator.mm
++++ b/ios/RNSScreenStackAnimator.mm
+@@ -516,11 +516,6 @@ - (void)animateNoneWithTransitionContext:(id<UIViewControllerContextTransitionin
+ 
+ #pragma mark - Public API
+ 
+-- (nullable id<UITimingCurveProvider>)timingParamsForAnimationCompletion
+-{
+-  return [RNSScreenStackAnimator defaultSpringTimingParametersApprox];
+-}
+-
+ + (BOOL)isCustomAnimation:(RNSScreenStackAnimation)animation
+ {
+   return (animation != RNSScreenStackAnimationFlip && animation != RNSScreenStackAnimationDefault);

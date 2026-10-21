@@ -28,5 +28,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web"
   },
-  "private": true
+  "private": true,
+  "patchedDependencies": {
+    "react-native-webgpu@0.17.0": "patches/react-native-webgpu@0.17.0.patch"
+  }
 }

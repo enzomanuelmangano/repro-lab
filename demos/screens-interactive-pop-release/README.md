@@ -50,3 +50,9 @@ completes the transition with:
 - The spring starts from rest. The finger's velocity is never passed in.
 - After `setReversed:YES`, `1 - fractionComplete` is the part of the transition the screen did *not*
   travel. For a 12% cancel the 12% left is replayed with a duration factor near 0, so it completes in a frame or two.
+
+## Upstream
+
+- Issue: https://github.com/software-mansion/react-native-screens/issues/5009
+- PR: https://github.com/software-mansion/react-native-screens/pull/5010
+- Fix branch here: `fix/screens-interactive-pop-release`

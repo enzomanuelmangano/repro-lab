@@ -1,0 +1,69 @@
+diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenFragment.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenFragment.kt
+index 6fcabc3e92949f5e4f5c80696f6d2403596f2308..671338d9000e50319ef3c96ead2a604f3517b1b8 100644
+--- a/android/src/main/java/com/swmansion/rnscreens/ScreenFragment.kt
++++ b/android/src/main/java/com/swmansion/rnscreens/ScreenFragment.kt
+@@ -299,7 +299,7 @@ open class ScreenFragment :
+             // onViewAnimationStart/End is triggered from View#onAnimationStart/End method of the fragment's root
+             // view. We override an appropriate method of the StackFragment's
+             // root view in order to achieve this.
+-            if (isResumed) {
++            if (isResumed && !isHidden) {
+                 // Android dispatches the animation start event for the fragment that is being added first
+                 // however we want the one being dismissed first to match iOS. It also makes more sense from
+                 // a navigation point of view to have the disappear event first.
+diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
+index 2372cac68d83deeb0a384d56c69b814c3bed9673..d1ec738522868edf9c327e45d02ee6b97bf153ac 100644
+--- a/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
++++ b/android/src/main/java/com/swmansion/rnscreens/ScreenStack.kt
+@@ -275,10 +275,16 @@ class ScreenStack(
+                 .asSequence()
+                 .takeWhile { it !== visibleBottom }
+                 .filter { (it !== newTop && !dismissedWrappers.contains(it)) || it.screen.activityState === Screen.ActivityState.INACTIVE }
+-                .forEach { wrapper -> transaction.remove(wrapper.fragment) }
++                .forEach { wrapper ->
++                    if (wrapper.screen.activityState === Screen.ActivityState.INACTIVE || !wrapper.fragment.isAdded) {
++                        transaction.remove(wrapper.fragment)
++                    } else if (!wrapper.fragment.isHidden) {
++                        transaction.hide(wrapper.fragment)
++                    }
++                }
+ 
+             // attach screens that just became visible
+-            if (visibleBottom != null && !visibleBottom.fragment.isAdded) {
++            if (visibleBottom != null && (!visibleBottom.fragment.isAdded || visibleBottom.fragment.isHidden)) {
+                 val top = newTop
+                 screenWrappers
+                     .asSequence()
+@@ -286,11 +292,17 @@ class ScreenStack(
+                     // dismissed screens are already removed above & preloaded ones must stay detached
+                     .filter { !dismissedWrappers.contains(it) && it.screen.activityState !== Screen.ActivityState.INACTIVE }
+                     .forEach { wrapper ->
+-                        // TODO: It should be enough to dispatch this on commit action once.
+-                        transaction.add(id, wrapper.fragment).runOnCommit {
+-                            top?.screen?.bringToFront()
++                        if (!wrapper.fragment.isAdded) {
++                            // TODO: It should be enough to dispatch this on commit action once.
++                            transaction.add(id, wrapper.fragment).runOnCommit {
++                                top?.screen?.bringToFront()
++                            }
++                        } else if (wrapper.fragment.isHidden) {
++                            transaction.show(wrapper.fragment)
+                         }
+                     }
++            } else if (newTop != null && newTop.fragment.isAdded && newTop.fragment.isHidden) {
++                transaction.show(newTop.fragment)
+             } else if (newTop != null && !newTop.fragment.isAdded) {
+                 if (newTop.screen.requiresEnterTransitionPostponing()) {
+                     newTop.fragment.postponeEnterTransition()
+diff --git a/android/src/main/java/com/swmansion/rnscreens/stack/anim/ScreensAnimation.kt b/android/src/main/java/com/swmansion/rnscreens/stack/anim/ScreensAnimation.kt
+index 7194ae8a97ea9b39988db166021aaebdc2f7a8d0..52265eb8f37316a541fb91130f5f9af0d988fa2f 100644
+--- a/android/src/main/java/com/swmansion/rnscreens/stack/anim/ScreensAnimation.kt
++++ b/android/src/main/java/com/swmansion/rnscreens/stack/anim/ScreensAnimation.kt
+@@ -13,6 +13,6 @@ internal class ScreensAnimation(
+     ) {
+         super.applyTransformation(interpolatedTime, t)
+         // interpolated time should be the progress of the current transition
+-        mFragment.dispatchTransitionProgressEvent(interpolatedTime, !mFragment.isResumed)
++        mFragment.dispatchTransitionProgressEvent(interpolatedTime, !mFragment.isResumed || mFragment.isHidden)
+     }
+ }

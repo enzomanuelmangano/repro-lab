@@ -32,7 +32,7 @@ npx expo run:ios
 | Demo | Library | Platform | Issue | PR |
 |---|---|---|---|---|
 | [screens-header-items-morph](demos/screens-header-items-morph) | react-native-screens 4.30.0 | iOS 26 | [#5003](https://github.com/software-mansion/react-native-screens/issues/5003) | [#5004](https://github.com/software-mansion/react-native-screens/pull/5004) |
-| [expo-ui-secure-text-input](demos/expo-ui-secure-text-input) | @expo/ui 58.0.21 | Android | – | – |
+| [expo-ui-secure-text-input](demos/expo-ui-secure-text-input) | @expo/ui 58.0.21 | Android | [expo#52009](https://github.com/expo/expo/issues/52009) | [expo#52010](https://github.com/expo/expo/pull/52010) |
 
 ## Versions
 

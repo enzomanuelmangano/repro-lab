@@ -31,3 +31,9 @@ adb shell dumpsys input_method | grep -m1 -o 'inputType=0x[0-9a-f]*'
 ## Why
 
 `src/universal/TextInput/index.android.tsx` maps `secureTextEntry` only to `visualTransformation: 'password'`, which masks the text. `keyboardOptions.keyboardType` stays `text`, and `autoCorrectEnabled` is not set, so Compose reports a plain text field to the keyboard.
+
+## Upstream
+
+- Issue: https://github.com/expo/expo/issues/52009
+- PR: https://github.com/expo/expo/pull/52010
+- Fix branch here: `fix/expo-ui-secure-text-input`

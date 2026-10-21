@@ -1,0 +1,41 @@
+diff --git a/lib/module/views/BottomTabView.js b/lib/module/views/BottomTabView.js
+index c9496b2fadbb869db5641c51d94d7c06be9530ad..4c5f21214d4172ef7637fb780de26d5d5f98aacc 100644
+--- a/lib/module/views/BottomTabView.js
++++ b/lib/module/views/BottomTabView.js
+@@ -257,10 +257,12 @@ const TabScene = /*#__PURE__*/React.memo(function TabScene({
+   : animationEnabled && isAnimatingRoute ? STATE_TRANSITIONING_OR_BELOW_TOP // screen visible during transition
+   : STATE_INACTIVE;
+   return /*#__PURE__*/_jsx(MaybeScreen, {
+-    style: [StyleSheet.absoluteFill, {
++    style: [StyleSheet.absoluteFill, detachInactiveScreens ? {
+       zIndex: isFocused ? 0 : -1
++    } : {
++      opacity: isFocused ? 1 : 0
+     }],
+-    active: activityState,
++    active: detachInactiveScreens ? activityState : STATE_ON_TOP,
+     enabled: detachInactiveScreens,
+     freezeOnBlur: freezeOnBlur,
+     shouldFreeze: activityState === STATE_INACTIVE && !isPreloaded,
+diff --git a/src/views/BottomTabView.tsx b/src/views/BottomTabView.tsx
+index 009b05c24d59aba7a4ad180476b0f2dc8d7094dd..5a1f50c70f06a7b4205027eafb38382b5fc2d6b7 100644
+--- a/src/views/BottomTabView.tsx
++++ b/src/views/BottomTabView.tsx
+@@ -382,8 +382,15 @@ const TabScene = React.memo(function TabScene({
+ 
+   return (
+     <MaybeScreen
+-      style={[StyleSheet.absoluteFill, { zIndex: isFocused ? 0 : -1 }]}
+-      active={activityState}
++      style={[
++        StyleSheet.absoluteFill,
++        // Without detaching, an inactive screen or a zIndex change would still take
++        // the scene off the window on Android. Keep it attached and hide it instead.
++        detachInactiveScreens
++          ? { zIndex: isFocused ? 0 : -1 }
++          : { opacity: isFocused ? 1 : 0 },
++      ]}
++      active={detachInactiveScreens ? activityState : STATE_ON_TOP}
+       enabled={detachInactiveScreens}
+       freezeOnBlur={freezeOnBlur}
+       shouldFreeze={activityState === STATE_INACTIVE && !isPreloaded}

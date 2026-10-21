@@ -29,5 +29,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web"
   },
-  "private": true
+  "private": true,
+  "patchedDependencies": {
+    "@react-navigation/bottom-tabs@7.21.0": "patches/@react-navigation%2Fbottom-tabs@7.21.0.patch"
+  }
 }

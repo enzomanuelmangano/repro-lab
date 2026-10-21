@@ -32,7 +32,8 @@ npx expo run:ios
 | Demo | Library | Platform | Issue | PR |
 |---|---|---|---|---|
 | [screens-header-items-morph](demos/screens-header-items-morph) | react-native-screens 4.30.0 | iOS 26 | [#5003](https://github.com/software-mansion/react-native-screens/issues/5003) | [#5004](https://github.com/software-mansion/react-native-screens/pull/5004) |
+| [expo-ui-secure-text-input](demos/expo-ui-secure-text-input) | @expo/ui 58.0.21 | Android | – | – |
 
 ## Versions
 
-Expo SDK 58.0.16 · React Native 0.88.0 · React 19.3.0 · `@react-navigation/native-stack` 7.21.0
+Expo SDK 58.0.16 · React Native 0.88.0 · React 19.3.0 · `@react-navigation/native-stack` 7.21.0 · `@expo/ui` 58.0.21

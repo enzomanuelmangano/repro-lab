@@ -30,7 +30,7 @@ export default function App() {
       <Stack.Navigator>
         <Stack.Screen name="repro-lab" component={DemoList} options={{ headerLargeTitle: true }} />
         {demos.map((demo) => (
-          <Stack.Screen key={demo.name} name={demo.name} component={demo.component} />
+          <Stack.Screen key={demo.name} name={demo.name} component={demo.component} options={demo.options} />
         ))}
       </Stack.Navigator>
     </NavigationContainer>

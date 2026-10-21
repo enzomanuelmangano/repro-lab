@@ -33,7 +33,8 @@ npx expo run:ios
 |---|---|---|---|---|
 | [screens-header-items-morph](demos/screens-header-items-morph) | react-native-screens 4.30.0 | iOS 26 | [#5003](https://github.com/software-mansion/react-native-screens/issues/5003) | [#5004](https://github.com/software-mansion/react-native-screens/pull/5004) |
 | [expo-ui-secure-text-input](demos/expo-ui-secure-text-input) | @expo/ui 58.0.21 | Android | [expo#52009](https://github.com/expo/expo/issues/52009) | [expo#52010](https://github.com/expo/expo/pull/52010) |
+| [webgpu-skia-shared-instance](demos/webgpu-skia-shared-instance) | react-native-skia 3.7.2 + react-native-webgpu 0.17.0 | iOS | – | – |
 
 ## Versions
 
-Expo SDK 58.0.16 · React Native 0.88.0 · React 19.3.0 · `@react-navigation/native-stack` 7.21.0 · `@expo/ui` 58.0.21
+Expo SDK 58.0.16 · React Native 0.88.0 · React 19.3.0 · `@react-navigation/native-stack` 7.21.0 · `@expo/ui` 58.0.21 · `react-native-skia` 3.7.2 · `react-native-webgpu` 0.17.0 · `react-native-reanimated` 4.7.1

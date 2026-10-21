@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 
 import * as expoUiSecureTextInput from './expo-ui-secure-text-input';
 import * as screensHeaderItemsMorph from './screens-header-items-morph';
+import * as webgpuSkiaSharedInstance from './webgpu-skia-shared-instance';
 
 export type Demo = {
   name: string;
@@ -10,4 +11,8 @@ export type Demo = {
   options?: object;
 };
 
-export const demos: Demo[] = [screensHeaderItemsMorph, expoUiSecureTextInput];
+export const demos: Demo[] = [
+  screensHeaderItemsMorph,
+  expoUiSecureTextInput,
+  webgpuSkiaSharedInstance,
+];

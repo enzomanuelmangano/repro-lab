@@ -23,6 +23,12 @@ the way back. Preloaded (`INACTIVE`) screens and never-added ones are still remo
 | frames over 50 ms | 7, 8 | 0, 0 |
 | PSS after the runs | ~235 MB | ~216 MB |
 
+Android "Profile GPU rendering" bars right after the back (each bar is a frame, the green line is 16 ms; the tall blue/green bars in the left screen are the covered screen being redrawn):
+
+![before | after](../../media/screens-android-back-reattach-bars.png)
+
+Video (3× slower): [screens-android-back-reattach.mp4](../../media/screens-android-back-reattach.mp4)
+
 ## Trade-offs of the change
 
 - A hidden fragment stays resumed, so `ScreenFragment` and `ScreensAnimation` treat a hidden fragment as

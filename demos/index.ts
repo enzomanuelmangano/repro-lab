@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 
+import * as bottomTabsSurfaceRebuild from './bottom-tabs-surface-rebuild';
 import * as expoUiSecureTextInput from './expo-ui-secure-text-input';
 import * as screensHeaderItemsMorph from './screens-header-items-morph';
 import * as screensInteractivePopRelease from './screens-interactive-pop-release';
@@ -17,4 +18,5 @@ export const demos: Demo[] = [
   expoUiSecureTextInput,
   webgpuSkiaSharedInstance,
   screensInteractivePopRelease,
+  bottomTabsSurfaceRebuild,
 ];

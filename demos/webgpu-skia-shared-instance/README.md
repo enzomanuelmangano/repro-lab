@@ -47,3 +47,6 @@ Same result, different cause. `librnskia.so` exports `rnskia_getWGPUInstance`
 - Issue: https://github.com/wcandillon/react-native-skia/issues/4305
 - PR: https://github.com/wcandillon/react-native-skia/pull/4306
 - Fix branch here: `fix/webgpu-skia-shared-instance`
+- Android issue: https://github.com/wcandillon/react-native-webgpu/issues/581
+- Android PR: https://github.com/wcandillon/react-native-webgpu/pull/582
+- Android fix branch here: `fix/webgpu-skia-shared-instance-android`

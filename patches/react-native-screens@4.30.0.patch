@@ -1,5 +1,8 @@
+diff --git a/node_modules/react-native-screens/.bun-tag-5d3d87cf81eccb5d b/.bun-tag-5d3d87cf81eccb5d
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/ios/RNSScreenStackHeaderConfig.mm b/ios/RNSScreenStackHeaderConfig.mm
-index e217b2411d20c85db3ec84bb87765c1e9407fd3b..3318c0714270b03e28b3066f392860e130648184 100644
+index e217b2411d20c85db3ec84bb87765c1e9407fd3b..c6fdc9d0c23d8a15280294db99302f5f2eac6252 100644
 --- a/ios/RNSScreenStackHeaderConfig.mm
 +++ b/ios/RNSScreenStackHeaderConfig.mm
 @@ -608,7 +608,10 @@ + (void)updateViewController:(UIViewController *)vc
@@ -26,20 +29,22 @@ index e217b2411d20c85db3ec84bb87765c1e9407fd3b..3318c0714270b03e28b3066f392860e1
          break;
        }
        case RNSScreenStackHeaderSubviewTypeCenter:
-@@ -698,8 +698,10 @@ + (void)updateViewController:(UIViewController *)vc
+@@ -698,8 +698,12 @@ + (void)updateViewController:(UIViewController *)vc
    navitem.title = config.title;
    navitem.leftBarButtonItems = [config barButtonItemsFromConfigs:config.headerLeftBarButtonItems
                                                  withCurrentItems:navitem.leftBarButtonItems];
 -  navitem.rightBarButtonItems = [config barButtonItemsFromConfigs:config.headerRightBarButtonItems
 -                                                 withCurrentItems:navitem.rightBarButtonItems];
++  // Not animated during a push or pop, which animates the bar itself, nor before
++  // the screen is on screen (its first header setup).
 +  [self setRightBarButtonItems:[config barButtonItemsFromConfigs:config.headerRightBarButtonItems
 +                                                withCurrentItems:rightItems]
-+               onNavigationItem:navitem
-+                       animated:animated && vc.transitionCoordinator == nil];
++              onNavigationItem:navitem
++                      animated:animated && vc.transitionCoordinator == nil && vc.viewIfLoaded.window != nil];
  
    // Setting navigation bar visibility is split to mitigate iOS 26 bug with bar button items
    // (setting nav bar visibility should be done after `navitem.*BarButtonItems`).
-@@ -830,6 +832,27 @@ - (void)applySemanticContentAttributeIfNeededToNavCtrl:(UINavigationController *
+@@ -830,6 +834,44 @@ - (void)applySemanticContentAttributeIfNeededToNavCtrl:(UINavigationController *
    }
  }
  
@@ -47,22 +52,39 @@ index e217b2411d20c85db3ec84bb87765c1e9407fd3b..3318c0714270b03e28b3066f392860e1
 +              onNavigationItem:(UINavigationItem *)navitem
 +                      animated:(BOOL)animated
 +{
-+  // Items are recreated on every header update, so animating each assignment
-+  // would animate unrelated changes (a new title, a new tint). Animate only when
-+  // the set of items changes, matched by `identifier` (or by count when items
-+  // have none), and only outside a push or pop, which animates the bar itself.
-+  // On iOS 26 this is what lets UIKit morph the Liquid Glass between the old and
++  // Config items are recreated on every header update, so animating each
++  // assignment would animate unrelated changes (a new title, a new tint).
++  // Animate only when the set of items changes, matched by `identifier`. On
++  // iOS 26 this is what lets UIKit morph the Liquid Glass between the old and
 +  // the new items.
-+  NSArray<UIBarButtonItem *> *previousItems = navitem.rightBarButtonItems ?: @[];
 +  BOOL setChanged = NO;
 +#if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0) && !TARGET_OS_TV
 +  if (@available(iOS 26.0, *)) {
-+    setChanged = previousItems.count > 0 &&
-+        ![[previousItems valueForKey:@"identifier"] isEqualToArray:[items valueForKey:@"identifier"]];
++    setChanged = ![[self matchingKeysForBarButtonItems:navitem.rightBarButtonItems ?: @[]]
++        isEqualToArray:[self matchingKeysForBarButtonItems:items]];
 +  }
 +#endif // RNS_IPHONE_OS_VERSION_AVAILABLE(26_0) && !TARGET_OS_TV
 +  [navitem setRightBarButtonItems:items animated:animated && setChanged];
 +}
++
++#if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0) && !TARGET_OS_TV
+++ (NSArray *)matchingKeysForBarButtonItems:(NSArray<UIBarButtonItem *> *)items API_AVAILABLE(ios(26.0))
++{
++  NSMutableArray *keys = [NSMutableArray arrayWithCapacity:items.count];
++  for (UIBarButtonItem *item in items) {
++    if (item.identifier != nil) {
++      [keys addObject:item.identifier];
++    } else if (item.customView != nil) {
++      // Custom (React element) items are kept by their header subview across
++      // updates, so the item itself identifies them.
++      [keys addObject:[NSValue valueWithNonretainedObject:item]];
++    } else {
++      [keys addObject:[NSNull null]];
++    }
++  }
++  return keys;
++}
++#endif // RNS_IPHONE_OS_VERSION_AVAILABLE(26_0) && !TARGET_OS_TV
 +
  - (NSArray<UIBarButtonItem *> *)barButtonItemsFromConfigs:(NSArray<NSDictionary<NSString *, id> *> *)dicts
                                           withCurrentItems:(NSArray<UIBarButtonItem *> *)currentItems

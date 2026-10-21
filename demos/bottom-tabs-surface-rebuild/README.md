@@ -26,5 +26,10 @@ inactive screen with `display: none`, which takes the scene off the window.
 | janky frames | 3.8% (11 frames) | 0% |
 | 99th percentile frame | 27–29 ms | 11 ms |
 
+The first frame after each switch shows the tab with its canvas missing (5 switches out of 5 in a
+recording, 0 with the fix):
+
+![before | after](../../media/bottom-tabs-surface-rebuild-frame.png)
+
 Unfocused scenes stay out of the accessibility tree in both builds (`uiautomator dump --compressed`): the scene's
 `aria-hidden` from `@react-navigation/elements` already hides them.

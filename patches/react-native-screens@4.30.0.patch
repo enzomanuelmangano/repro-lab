@@ -1,0 +1,58 @@
+diff --git a/ios/RNSPercentDrivenInteractiveTransition.h b/ios/RNSPercentDrivenInteractiveTransition.h
+index f993cc73b0f0c71632f62c75bca1a05cdf07188a..29607ba35487ce27e4ae2cab712f42d7259ab80a 100644
+--- a/ios/RNSPercentDrivenInteractiveTransition.h
++++ b/ios/RNSPercentDrivenInteractiveTransition.h
+@@ -9,6 +9,11 @@ NS_ASSUME_NONNULL_BEGIN
+ 
+ @property (nonatomic, nullable) RNSScreenStackAnimator *animationController;
+ 
++/// Finger velocity at release (pt/s, positive toward dismissal) and the length of the
++/// transition along the gesture axis (pt). Seed the spring that completes the transition.
++@property (nonatomic) CGFloat releaseVelocity;
++@property (nonatomic) CGFloat transitionDistance;
++
+ @end
+ 
+ NS_ASSUME_NONNULL_END
+diff --git a/ios/RNSPercentDrivenInteractiveTransition.mm b/ios/RNSPercentDrivenInteractiveTransition.mm
+index 459aa289d066d8ee93074d8897dc9d416b2746a4..e23df3c6905c49d812cbfbe8863e0c2017f6aa3e 100644
+--- a/ios/RNSPercentDrivenInteractiveTransition.mm
++++ b/ios/RNSPercentDrivenInteractiveTransition.mm
+@@ -56,11 +56,21 @@ - (void)finalizeInteractiveTransitionWithAnimationWasCancelled:(BOOL)cancelled
+ 
+   BOOL shouldReverseAnimation = cancelled;
+ 
+-  id<UITimingCurveProvider> timingParams = [_animationController timingParamsForAnimationCompletion];
+-
+   [animator pauseAnimation];
+   [animator setReversed:shouldReverseAnimation];
+-  [animator continueAnimationWithTimingParameters:timingParams durationFactor:(1 - animator.fractionComplete)];
++
++  // Continue at the finger's speed, over the transition's full duration. The spring's initial
++  // velocity is relative to the distance left to travel, and it points toward the target, so a
++  // cancel flips the sign. `1 - fractionComplete` is not the distance left once the animator is
++  // reversed, and as a duration factor it replayed a short cancel in a frame or two.
++  CGFloat remaining =
++      (shouldReverseAnimation ? animator.fractionComplete : 1 - animator.fractionComplete) * _transitionDistance;
++  CGFloat velocityTowardTarget = shouldReverseAnimation ? -_releaseVelocity : _releaseVelocity;
++  CGFloat relativeVelocity = remaining > 1 ? velocityTowardTarget / remaining : 0;
++  UISpringTimingParameters *timingParams =
++      [[UISpringTimingParameters alloc] initWithDampingRatio:1
++                                             initialVelocity:CGVectorMake(relativeVelocity, relativeVelocity)];
++  [animator continueAnimationWithTimingParameters:timingParams durationFactor:1];
+ 
+   // System retains it & we don't need it anymore.
+   _animationController = nil;
+diff --git a/ios/RNSScreenStack.mm b/ios/RNSScreenStack.mm
+index 5da11964f5932cb44e1131c44a2480803c0a62b5..0eb52987d1060c2d5daceb3f4b6a758a8dd69186 100644
+--- a/ios/RNSScreenStack.mm
++++ b/ios/RNSScreenStack.mm
+@@ -1019,6 +1019,8 @@ - (void)handleSwipe:(UIPanGestureRecognizer *)gestureRecognizer
+       float gestureDistance = translation + velocity * 0.3;
+       gestureDistance = isInverted ? gestureDistance * -1 : gestureDistance;
+       BOOL shouldFinishTransition = gestureDistance > snapPoint;
++      _interactionController.releaseVelocity = isInverted ? -velocity : velocity;
++      _interactionController.transitionDistance = distance;
+       if (shouldFinishTransition) {
+         [_interactionController finishInteractiveTransition];
+       } else {

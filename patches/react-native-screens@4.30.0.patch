@@ -1,0 +1,126 @@
+diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
+index fa1b77317f609983ae2434764174072e51130550..7cb267c23002fe864dcbdc8bb2ad5c5fe76a9363 100644
+--- a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
++++ b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
+@@ -168,6 +168,12 @@ class ScreenStackHeaderConfigViewManager :
+         config.setHideShadow(hideShadow)
+     }
+ 
++    // iOS only.
++    override fun setSystemBackButton(
++        config: ScreenStackHeaderConfig,
++        systemBackButton: Boolean,
++    ) = Unit
++
+     override fun setHideBackButton(
+         config: ScreenStackHeaderConfig,
+         hideBackButton: Boolean,
+diff --git a/ios/RNSScreenStackHeaderConfig.h b/ios/RNSScreenStackHeaderConfig.h
+index 8f99f5b5b9d3f184f36613d51174cb9393d2cdd6..bd404f457880c132f8eb7e834cc4b5fee7de01f4 100644
+--- a/ios/RNSScreenStackHeaderConfig.h
++++ b/ios/RNSScreenStackHeaderConfig.h
+@@ -42,6 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
+ @property (nonatomic) BOOL largeTitleHideShadow;
+ @property (nonatomic, retain) UIColor *largeTitleColor;
+ @property (nonatomic) BOOL hideBackButton;
++@property (nonatomic) BOOL systemBackButton;
+ @property (nonatomic) BOOL disableBackButtonMenu;
+ @property (nonatomic) BOOL hideShadow;
+ @property (nonatomic) BOOL translucent;
+diff --git a/ios/RNSScreenStackHeaderConfig.mm b/ios/RNSScreenStackHeaderConfig.mm
+index e217b2411d20c85db3ec84bb87765c1e9407fd3b..86a27f8d29072fdcb58c98ab572bae67003c98f0 100644
+--- a/ios/RNSScreenStackHeaderConfig.mm
++++ b/ios/RNSScreenStackHeaderConfig.mm
+@@ -605,6 +605,25 @@ + (void)updateViewController:(UIViewController *)vc
+ #if !TARGET_OS_TV
+   navitem.hidesBackButton = config.hideBackButton;
+   navitem.leftItemsSupplementBackButton = config.backButtonInCustomView;
++  // The system back button, its press handed to JS. `backAction` replaces the
++  // button's action, and where the stack has nothing behind this screen UIKit
++  // synthesizes the button for it. Set once: the action looks the header config
++  // up when pressed, so it outlives a replaced config.
++  if (config.systemBackButton) {
++    navitem.backButtonDisplayMode = config.backButtonDisplayMode;
++    if (navitem.backAction == nil) {
++      __weak UIViewController *weakVC = vc;
++      navitem.backAction = [UIAction actionWithHandler:^(__kindof UIAction *_Nonnull action) {
++        UIViewController *pressedVC = weakVC;
++        if (![pressedVC isKindOfClass:[RNSScreen class]]) {
++          return;
++        }
++        [static_cast<RNSScreen *>(pressedVC).screenView.findHeaderConfig emitOnPressBackButton];
++      }];
++    }
++  } else if (navitem.backAction != nil) {
++    navitem.backAction = nil;
++  }
+ #endif
+   navitem.titleView = nil;
+   navitem.leftBarButtonItems = nil;
+@@ -830,6 +849,15 @@ - (void)applySemanticContentAttributeIfNeededToNavCtrl:(UINavigationController *
+   }
+ }
+ 
++- (void)emitOnPressBackButton
++{
++  auto eventEmitter =
++      std::static_pointer_cast<const facebook::react::RNSScreenStackHeaderConfigEventEmitter>(_eventEmitter);
++  if (eventEmitter) {
++    eventEmitter->onPressBackButton(facebook::react::RNSScreenStackHeaderConfigEventEmitter::OnPressBackButton{});
++  }
++}
++
+ - (NSArray<UIBarButtonItem *> *)barButtonItemsFromConfigs:(NSArray<NSDictionary<NSString *, id> *> *)dicts
+                                          withCurrentItems:(NSArray<UIBarButtonItem *> *)currentItems
+ {
+@@ -1078,6 +1106,7 @@ - (void)updateProps:(react::Props::Shared const &)props oldProps:(react::Props::
+   }
+ 
+   _title = RCTNSStringFromStringNilIfEmpty(newScreenProps.title);
++  _systemBackButton = newScreenProps.systemBackButton;
+   if (newScreenProps.titleFontFamily != oldScreenProps.titleFontFamily) {
+     _titleFontFamily = RCTNSStringFromStringNilIfEmpty(newScreenProps.titleFontFamily);
+   }
+diff --git a/src/fabric/ScreenStackHeaderConfigNativeComponent.ts b/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
+index da28c51c6ffd29b996c876742a11cfdf322db969..34148cc26654441d800de4fc94e575eb5fc13f2d 100644
+--- a/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
++++ b/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
+@@ -17,6 +17,8 @@ type OnDetachedEvent = Readonly<{}>;
+ 
+ type OnPressHeaderBarButtonItemEvent = Readonly<{ buttonId: string }>;
+ type OnPressHeaderBarButtonMenuItemEvent = Readonly<{ menuId: string }>;
++// eslint-disable-next-line @typescript-eslint/ban-types
++type OnPressBackButtonEvent = Readonly<{}>;
+ 
+ type BackButtonDisplayMode = 'minimal' | 'default' | 'generic';
+ 
+@@ -73,6 +75,8 @@ export interface NativeProps extends ViewProps {
+   disableBackButtonMenu?: boolean | undefined;
+   backButtonDisplayMode?: CT.WithDefault<BackButtonDisplayMode, 'default'>;
+   hideBackButton?: boolean | undefined;
++  systemBackButton?: CT.WithDefault<boolean, false>;
++  onPressBackButton?: CT.DirectEventHandler<OnPressBackButtonEvent> | undefined;
+   backButtonInCustomView?: boolean | undefined;
+   blurEffect?: CT.WithDefault<BlurEffect, 'none'>;
+   // TODO: implement this props on iOS
+diff --git a/src/types.tsx b/src/types.tsx
+index 3ec38fa0c19fc3aa444394e22737d23d4220e978..0974e20b3f3ba813420e55c9b87d771e0c17cdad 100644
+--- a/src/types.tsx
++++ b/src/types.tsx
+@@ -831,6 +831,16 @@ export interface ScreenStackHeaderConfigProps extends ViewProps {
+    * String that can be displayed in the header as a fallback for `headerTitle`.
+    */
+   title?: string | undefined;
++  /**
++   * iOS: show the system back button, also where the stack has nothing behind
++   * this screen (the first screen of a nested stack), and report its press
++   * through `onPressBackButton` instead of popping natively.
++   */
++  systemBackButton?: boolean | undefined;
++  /**
++   * iOS: called when the back button shown by `systemBackButton` is pressed.
++   */
++  onPressBackButton?: (() => void) | undefined;
+   /**
+    * Allows for setting text color of the title.
+    */

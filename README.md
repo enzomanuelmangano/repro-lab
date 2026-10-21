@@ -31,7 +31,7 @@ npx expo run:ios
 
 | Demo | Library | Platform | Issue | PR |
 |---|---|---|---|---|
-| [screens-header-items-morph](demos/screens-header-items-morph) | react-native-screens 4.30.0 | iOS 26 | – | – |
+| [screens-header-items-morph](demos/screens-header-items-morph) | react-native-screens 4.30.0 | iOS 26 | [#5003](https://github.com/software-mansion/react-native-screens/issues/5003) | [#5004](https://github.com/software-mansion/react-native-screens/pull/5004) |
 
 ## Versions
 

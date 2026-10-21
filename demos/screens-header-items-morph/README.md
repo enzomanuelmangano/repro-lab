@@ -28,3 +28,9 @@ The items jump: the old glass disappears and the new one appears in the next fra
 `+[RNSScreenStackHeaderConfig updateViewController:withConfig:animated:]` clears
 `navitem.rightBarButtonItems = nil` at the start of every header update and then assigns
 the new items without animation, so UIKit never sees a change it can animate.
+
+## Upstream
+
+- Issue: https://github.com/software-mansion/react-native-screens/issues/5003
+- PR: https://github.com/software-mansion/react-native-screens/pull/5004
+- Fix branch here: `fix/screens-header-items-morph`

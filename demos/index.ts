@@ -6,6 +6,7 @@ import * as expoUiSecureTextInput from './expo-ui-secure-text-input';
 import * as screensAndroidBackReattach from './screens-android-back-reattach';
 import * as screensHeaderItemsMorph from './screens-header-items-morph';
 import * as screensInteractivePopRelease from './screens-interactive-pop-release';
+import * as screensSystemBackButton from './screens-system-back-button';
 import * as webgpuSkiaSharedInstance from './webgpu-skia-shared-instance';
 
 export type Demo = {
@@ -22,5 +23,6 @@ export const demos: Demo[] = [
   screensInteractivePopRelease,
   bottomTabsSurfaceRebuild,
   screensAndroidBackReattach,
+  screensSystemBackButton,
   expoBlurTransition,
 ];

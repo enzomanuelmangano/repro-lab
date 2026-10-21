@@ -1,7 +1,7 @@
 # webgpu-skia-shared-instance
 
 **Libraries:** `react-native-skia` 3.7.2 (Graphite) + `react-native-webgpu` 0.17.0 (also `main` of both)
-**Platform:** iOS (CocoaPods, static libraries, the Expo/React Native default). Debug and Release.
+**Platforms:** iOS and Android. Two causes, one per platform.
 
 ## Steps
 
@@ -31,6 +31,16 @@ react-native-webgpu then creates its own instance, and callbacks of the imported
 | Before | After (`fix/webgpu-skia-shared-instance`) |
 | --- | --- |
 | ![before](../../media/webgpu-skia-shared-instance-before.png) | ![after](../../media/webgpu-skia-shared-instance-after.png) |
+
+## Android
+
+Same result, different cause. `librnskia.so` exports `rnskia_getWGPUInstance`
+(`llvm-nm -D librnskia.so` → `T rnskia_getWGPUInstance`), but `System.loadLibrary` loads it with
+`RTLD_LOCAL`, and `dlsym(RTLD_DEFAULT, …)` does not search libraries loaded that way.
+
+| Before | After (`fix/webgpu-skia-shared-instance-android`) |
+| --- | --- |
+| ![before](../../media/webgpu-skia-shared-instance-android-before.png) | ![after](../../media/webgpu-skia-shared-instance-android-after.png) |
 
 ## Upstream
 

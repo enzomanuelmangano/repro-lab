@@ -5,7 +5,7 @@ import { importDevice } from 'react-native-webgpu';
 
 export const name = 'webgpu-skia-shared-instance';
 export const description =
-  "iOS: react-native-webgpu can't find Skia's Dawn instance (the linker drops it), so async work on Skia's device never settles.";
+  "iOS and Android: react-native-webgpu can't find Skia's Dawn instance, so async work on Skia's device never settles.";
 
 const TIMEOUT_MS = 3000;
 

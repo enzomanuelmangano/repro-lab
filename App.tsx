@@ -24,9 +24,15 @@ function DemoList({ navigation }: { navigation: any }) {
   );
 }
 
+// reprolab://demo/<name> opens a demo directly, so a run can be started without taps.
+const linking = {
+  prefixes: ['reprolab://'],
+  config: { screens: Object.fromEntries(demos.map((demo) => [demo.name, `demo/${demo.name}`])) },
+};
+
 export default function App() {
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator>
         <Stack.Screen name="repro-lab" component={DemoList} options={{ headerLargeTitle: true }} />
         {demos.map((demo) => (

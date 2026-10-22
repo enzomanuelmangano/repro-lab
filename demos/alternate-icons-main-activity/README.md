@@ -49,6 +49,11 @@ An install that already picked an icon with 8.0.0 stays broken after updating to
 
 Measured on an API 36 emulator, release builds: 3 update runs and 2 fresh-install runs, each read from `adb logcat -b events` (activity creations) and `dumpsys package` / `cmd package query-activities` (component states, launcher entries).
 
-## Video
+## Videos
 
-[before | after](../../media/alternate-icons-main-activity-before-after.mp4): Night icon picked, then **App theme: dark**.
+- [8.0.0 | fix](../../media/alternate-icons-main-activity-before-after.mp4): fresh install, Night icon picked, then **App theme: dark**.
+- [#267 only | #267 + fix](../../media/alternate-icons-update-before-after.mp4): updated from 8.0.0 with the Night icon picked: app drawer, **App theme: dark**, the link, app drawer again.
+
+## Applying the fix
+
+`fix/alternate-icons-main-activity` applies `patches/expo-alternate-app-icons@8.0.0.patch` from a `postinstall` script with `git apply`, not through bun's `patchedDependencies`: bun cannot apply a patch that adds a file, and the fix adds `ExpoAlternateAppIconsPackage.kt` (Expo autolinking only finds `*Package.kt` files).

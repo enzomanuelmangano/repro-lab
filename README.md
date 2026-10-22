@@ -39,7 +39,7 @@ npx expo run:ios
 | [screens-android-back-reattach](demos/screens-android-back-reattach) | react-native-screens 4.30.0 | Android | [Discussion #5012](https://github.com/software-mansion/react-native-screens/discussions/5012) | – |
 | [screens-system-back-button](demos/screens-system-back-button) | react-native-screens 4.30.0 | iOS | [Discussion \#5006](https://github.com/software-mansion/react-native-screens/discussions/5006) | – |
 | [alternate-icons-main-activity](demos/alternate-icons-main-activity) | expo-alternate-app-icons 8.0.0 | Android | [#278](https://github.com/pchalupa/expo-alternate-app-icons/issues/278) | [theeket#1](https://github.com/theeket/expo-alternate-app-icons/pull/1) (into [#267](https://github.com/pchalupa/expo-alternate-app-icons/pull/267)) |
-| [expo-ui-sheet-nav-bar](demos/expo-ui-sheet-nav-bar) | @expo/ui 58.0.21 | Android 15+ | – | – |
+| [expo-ui-sheet-nav-bar](demos/expo-ui-sheet-nav-bar) | @expo/ui 58.0.21 | Android 15+ | [expo#52080](https://github.com/expo/expo/issues/52080) | [expo#52081](https://github.com/expo/expo/pull/52081) |
 
 ## Versions
 

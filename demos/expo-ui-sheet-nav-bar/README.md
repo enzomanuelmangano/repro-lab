@@ -33,3 +33,9 @@ Material3 shows `ModalBottomSheet` in its own edge-to-edge dialog window, so the
 ## Fix
 
 `fix/expo-ui-sheet-nav-bar` sets `isNavigationBarContrastEnforced = false` on the sheet's dialog window (API 29+), from the sheet content, the same way `ForwardKeyEventsToActivity` finds that window. The bar icons are already chosen against the sheet's container color (expo/expo#49394), so no scrim is needed. Measured at the bar's pixels: cream `#FFFEFC` → `#FFF4E0`, dark `#1B1C21` → `#1C1C1E`; gesture navigation and API 34 unchanged.
+
+## Upstream
+
+- Issue: https://github.com/expo/expo/issues/52080
+- PR: https://github.com/expo/expo/pull/52081
+- Fix branch here: `fix/expo-ui-sheet-nav-bar`

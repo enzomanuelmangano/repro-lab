@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import * as alternateIconsMainActivity from './alternate-icons-main-activity';
 import * as bottomTabsSurfaceRebuild from './bottom-tabs-surface-rebuild';
 import * as expoBlurTransition from './expo-blur-transition';
+import * as expoUiSheetNavBar from './expo-ui-sheet-nav-bar';
 import * as expoUiSecureTextInput from './expo-ui-secure-text-input';
 import * as screensAndroidBackReattach from './screens-android-back-reattach';
 import * as screensHeaderItemsMorph from './screens-header-items-morph';
@@ -27,4 +28,5 @@ export const demos: Demo[] = [
   screensSystemBackButton,
   expoBlurTransition,
   alternateIconsMainActivity,
+  expoUiSheetNavBar,
 ];

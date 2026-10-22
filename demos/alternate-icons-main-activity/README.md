@@ -57,3 +57,9 @@ Measured on an API 36 emulator, release builds: 3 update runs and 2 fresh-instal
 ## Applying the fix
 
 `fix/alternate-icons-main-activity` applies `patches/expo-alternate-app-icons@8.0.0.patch` from a `postinstall` script with `git apply`, not through bun's `patchedDependencies`: bun cannot apply a patch that adds a file, and the fix adds `ExpoAlternateAppIconsPackage.kt` (Expo autolinking only finds `*Package.kt` files).
+
+## Upstream
+
+- Issue: https://github.com/pchalupa/expo-alternate-app-icons/issues/278
+- PR into #267's branch: https://github.com/theeket/expo-alternate-app-icons/pull/1
+- Fix branch here: `fix/alternate-icons-main-activity`

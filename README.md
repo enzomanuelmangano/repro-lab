@@ -38,6 +38,7 @@ npx expo run:ios
 | [bottom-tabs-surface-rebuild](demos/bottom-tabs-surface-rebuild) | @react-navigation/bottom-tabs 7.21.0 | Android | – | – |
 | [screens-android-back-reattach](demos/screens-android-back-reattach) | react-native-screens 4.30.0 | Android | [Discussion #5012](https://github.com/software-mansion/react-native-screens/discussions/5012) | – |
 | [screens-system-back-button](demos/screens-system-back-button) | react-native-screens 4.30.0 | iOS | [Discussion \#5006](https://github.com/software-mansion/react-native-screens/discussions/5006) | – |
+| [alternate-icons-main-activity](demos/alternate-icons-main-activity) | expo-alternate-app-icons 8.0.0 | Android | – | – |
 
 ## Versions
 

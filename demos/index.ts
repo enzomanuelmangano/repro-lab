@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 
+import * as alternateIconsMainActivity from './alternate-icons-main-activity';
 import * as bottomTabsSurfaceRebuild from './bottom-tabs-surface-rebuild';
 import * as expoBlurTransition from './expo-blur-transition';
 import * as expoUiSecureTextInput from './expo-ui-secure-text-input';
@@ -25,4 +26,5 @@ export const demos: Demo[] = [
   screensAndroidBackReattach,
   screensSystemBackButton,
   expoBlurTransition,
+  alternateIconsMainActivity,
 ];

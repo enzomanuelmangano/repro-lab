@@ -3,6 +3,8 @@
 **Libraries:** `react-native-skia` 3.7.2 (Graphite) + `react-native-webgpu` 0.17.0 (also `main` of both)
 **Platforms:** iOS and Android. Two causes, one per platform.
 
+> **Fixed upstream since.** repro-lab `main` now runs `react-native-skia` 3.10.2 + `react-native-webgpu` 0.21.4, where this demo shows the expected result (`mapAsync` settled in 4 ms, iPhone 17 simulator). The steps above reproduce on the versions listed.
+
 ## Steps
 
 1. `bun install && npx expo run:ios`, open **webgpu-skia-shared-instance**.

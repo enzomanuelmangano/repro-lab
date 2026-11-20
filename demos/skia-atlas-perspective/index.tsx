@@ -1,5 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
+import {
+  cancelAnimation,
+  Easing,
+  useDerivedValue,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import {
   Atlas,
   Canvas,
@@ -14,13 +22,13 @@ import {
 
 export const name = 'skia-atlas-perspective';
 export const description =
-  'An <Atlas> under a perspective Group matrix loses parts of its sprites (cut along their diagonal or missing); the same sprites drawn as images are whole.';
+  'An <Atlas> under a perspective Group matrix loses parts of its sprites (cut along their diagonal, or missing); the same sprites drawn as <Image>s are whole.';
 
-const CELL = 128; // sprite size in the sheet
-const GRID = 4; // sprites per row and column on each side
+const CELL = 128; // sprite size in the sheet, px
+const GRID = 4; // sprites per row and per column, on each side
 const SAMPLING = { filter: FilterMode.Linear, mipmap: MipmapMode.Linear };
 
-// A one-sprite sheet: an opaque square with a dark ring, drawn at runtime.
+// A one-sprite sheet: an opaque magenta square with a dark ring, drawn at runtime.
 function makeSheet(): SkImage {
   const surface = Skia.Surface.MakeOffscreen(CELL, CELL)!;
   const canvas = surface.getCanvas();
@@ -33,27 +41,31 @@ function makeSheet(): SkImage {
   return surface.makeImageSnapshot();
 }
 
-// The 3x3 matrix taking a size x size square onto the quad (Heckbert's
-// square-to-quad), row-major as Skia reads it: a board tilting away.
-function squareToQuad(size: number, q: number[]): number[] {
+// The 3x3 matrix (row-major, as Skia reads it) taking the rect w x h onto the quad
+// q = [x0, y0, x1, y1, x2, y2, x3, y3] (top-left, top-right, bottom-right, bottom-left).
+// Heckbert's square-to-quad, composed with a scale of the rect onto the unit square.
+function rectToQuad(w: number, h: number, q: number[]): number[] {
+  'worklet';
   const [x0, y0, x1, y1, x2, y2, x3, y3] = q;
   const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3;
   const dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
   const den = dx1 * dy2 - dx2 * dy1;
-  const g = (dx3 * dy2 - dx2 * dy3) / den;
-  const h = (dx1 * dy3 - dx3 * dy1) / den;
-  const a = x1 - x0 + g * x1, b = x3 - x0 + h * x3;
-  const d = y1 - y0 + g * y1, e = y3 - y0 + h * y3;
-  return [a / size, b / size, x0, d / size, e / size, y0, g / size, h / size, 1];
+  const g = den === 0 ? 0 : (dx3 * dy2 - dx2 * dy3) / den;
+  const h3 = den === 0 ? 0 : (dx1 * dy3 - dx3 * dy1) / den;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + h3 * x3;
+  const d = y1 - y0 + g * y1, e = y3 - y0 + h3 * y3;
+  return [a / w, b / h, x0, d / w, e / h, y0, g / w, h3 / h, 1];
 }
 
 function AtlasPerspective() {
   const { width } = useWindowDimensions();
-  const [tilted, setTilted] = useState(true);
+  const [animate, setAnimate] = useState(true);
   const sheet = useMemo(makeSheet, []);
-  const half = width / 2;
-  const size = half - 16; // each side's grid, in points
-  const step = size / GRID;
+
+  const W = width - 16; // the plane: both grids side by side
+  const half = W / 2;
+  const step = (half - 8) / GRID;
+  const H = step * GRID;
   const scale = (step - 6) / CELL;
 
   const sprites = useMemo(
@@ -67,27 +79,38 @@ function AtlasPerspective() {
       ),
     [scale, step],
   );
-  // The whole canvas (both grids side by side) tilting away, far edge shorter.
-  const W = width - 16;
-  const H = size;
-  const matrix = tilted
-    ? squareToQuad(1, [8 + W * 0.18, 10, 8 + W * 0.82, 30, 8 + W, H + 40, 8, H + 20]).map((v, i) =>
-        // the square here is 1x1: scale its x/y inputs back to W x H
-        i % 3 === 0 ? v / W : i % 3 === 1 ? v / H : v,
-      )
-    : [1, 0, 8, 0, 1, 0, 0, 0, 1];
+
+  // 0 = flat, 1 = tilted away (far edge shorter). Animated back and forth, or held at 1.
+  const tilt = useSharedValue(1);
+  useEffect(() => {
+    if (animate) {
+      tilt.set(0);
+      tilt.set(withRepeat(withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.quad) }), -1, true));
+    } else {
+      cancelAnimation(tilt);
+      tilt.set(1);
+    }
+  }, [animate, tilt]);
+
+  const matrix = useDerivedValue(() => {
+    const t = tilt.get();
+    const flat = [8, 0, 8 + W, 0, 8 + W, H, 8, H];
+    const tilted = [8 + W * 0.2, 10, 8 + W * 0.8, 30, 8 + W, H + 40, 8, H + 20];
+    const q = flat.map((v, i) => v + (tilted[i] - v) * t);
+    return rectToQuad(W, H, q);
+  });
 
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Text style={styles.label}>Perspective</Text>
-        <Switch testID="tilt" value={tilted} onValueChange={setTilted} />
+        <Text style={styles.label}>Animate the tilt</Text>
+        <Switch testID="animate" value={animate} onValueChange={setAnimate} />
       </View>
       <View style={styles.row}>
-        <Text style={styles.caption}>{'<Atlas> (left)'}</Text>
-        <Text style={styles.caption}>{'<Image> per sprite (right)'}</Text>
+        <Text style={styles.caption}>{'<Atlas>'}</Text>
+        <Text style={styles.caption}>{'<Image> per sprite'}</Text>
       </View>
-      <Canvas style={{ width, height: size + 80 }}>
+      <Canvas style={{ width, height: H + 60 }}>
         <Group matrix={matrix}>
           <Atlas image={sheet} sprites={sprites} transforms={transforms} sampling={SAMPLING} />
           {transforms.map((t, i) => (
@@ -104,9 +127,10 @@ function AtlasPerspective() {
         </Group>
       </Canvas>
       <Text style={styles.note}>
-        Expected: both sides show {GRID * GRID} whole squares, tilted or flat. Actual (react-native-skia
-        3.9.0 and later, iOS and Android): with perspective on, the atlas squares are cut along their
-        diagonal or missing.
+        Both halves draw the same {GRID * GRID} squares inside one {'<Group matrix>'} with perspective.
+        {'\n'}Expected: the left half matches the right half at every tilt.
+        {'\n'}Actual on react-native-skia 3.9.0+: while tilted, the left (atlas) squares are cut along
+        their diagonal or missing.
       </Text>
     </View>
   );

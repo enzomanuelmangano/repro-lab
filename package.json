@@ -41,5 +41,8 @@
         ]
       }
     }
+  },
+  "patchedDependencies": {
+    "react-native-skia@3.10.2": "patches/react-native-skia@3.10.2.patch"
   }
 }

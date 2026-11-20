@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import {
   cancelAnimation,
   Easing,
@@ -27,6 +27,8 @@ export const description =
 const CELL = 128; // sprite size in the sheet, px
 const GRID = 4; // sprites per row and per column, on each side
 const SAMPLING = { filter: FilterMode.Linear, mipmap: MipmapMode.Linear };
+const MODES = ['flat', 'tilted', 'animate'] as const;
+type Mode = (typeof MODES)[number];
 
 // A one-sprite sheet: an opaque magenta square with a dark ring, drawn at runtime.
 function makeSheet(): SkImage {
@@ -59,7 +61,7 @@ function rectToQuad(w: number, h: number, q: number[]): number[] {
 
 function AtlasPerspective() {
   const { width } = useWindowDimensions();
-  const [animate, setAnimate] = useState(true);
+  const [mode, setMode] = useState<Mode>('animate');
   const sheet = useMemo(makeSheet, []);
 
   const W = width - 16; // the plane: both grids side by side
@@ -83,14 +85,14 @@ function AtlasPerspective() {
   // 0 = flat, 1 = tilted away (far edge shorter). Animated back and forth, or held at 1.
   const tilt = useSharedValue(1);
   useEffect(() => {
-    if (animate) {
+    cancelAnimation(tilt);
+    if (mode === 'animate') {
       tilt.set(0);
       tilt.set(withRepeat(withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.quad) }), -1, true));
     } else {
-      cancelAnimation(tilt);
-      tilt.set(1);
+      tilt.set(mode === 'tilted' ? 1 : 0);
     }
-  }, [animate, tilt]);
+  }, [mode, tilt]);
 
   const matrix = useDerivedValue(() => {
     const t = tilt.get();
@@ -103,8 +105,15 @@ function AtlasPerspective() {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Text style={styles.label}>Animate the tilt</Text>
-        <Switch testID="animate" value={animate} onValueChange={setAnimate} />
+        {MODES.map((m) => (
+          <Pressable
+            key={m}
+            testID={m}
+            onPress={() => setMode(m)}
+            style={[styles.mode, mode === m && styles.modeOn]}>
+            <Text style={[styles.modeText, mode === m && styles.modeTextOn]}>{m}</Text>
+          </Pressable>
+        ))}
       </View>
       <View style={styles.row}>
         <Text style={styles.caption}>{'<Atlas>'}</Text>
@@ -139,7 +148,10 @@ function AtlasPerspective() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 16, backgroundColor: 'white' },
   row: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginBottom: 8 },
-  label: { fontSize: 16 },
+  mode: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, backgroundColor: '#eee' },
+  modeOn: { backgroundColor: '#222' },
+  modeText: { fontSize: 15, color: '#222' },
+  modeTextOn: { color: 'white' },
   caption: { fontSize: 13, color: '#555' },
   note: { margin: 16, fontSize: 13, color: '#333' },
 });
